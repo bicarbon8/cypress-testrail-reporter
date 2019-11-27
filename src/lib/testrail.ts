@@ -155,11 +155,11 @@ export class TestRail {
   }
 
   private async get<T>(action: string, urlData: string): Promise<T> {
-    return await this.makeRequest('GET', action, urlData);
+    return await this.makeRequest<T>('GET', action, urlData);
   }
 
   private async post<T>(action: string, urlData: string, data: {}): Promise<T> {
-    return await this.makeRequest('POST', action, urlData, data);
+    return await this.makeRequest<T>('POST', action, urlData, data);
   }
 
   private async makeRequest<T>(method: string, action: string, urlData: string, data?: {}): Promise<T> {
@@ -181,7 +181,7 @@ export class TestRail {
           await new Promise((resolve, reject) => {
             setTimeout(resolve, 60000);
           });
-          responseObj = await this.makeRequest(method, action, urlData, data);
+          responseObj = await this.makeRequest<T>(method, action, urlData, data);
         } else {
           throw new Error(resp.data.error);
         }
