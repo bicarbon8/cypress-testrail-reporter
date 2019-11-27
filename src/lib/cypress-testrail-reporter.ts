@@ -18,13 +18,22 @@ export class CypressTestRailReporter extends reporters.Spec {
     this.validate(reporterOptions, 'username');
     this.validate(reporterOptions, 'password');
     this.validate(reporterOptions, 'projectId');
-    this.validate(reporterOptions, 'suiteId');
+    if (options.usePlan === true) {
+      this.validate(reporterOptions, 'suiteIds');
+    } else {
+      this.validate(reporterOptions, 'suiteId');
+    }
 
     runner.on('start', () => {
       const executionDateTime = moment().format('MMM Do YYYY, HH:mm (Z)');
       const name = `${reporterOptions.runName || 'Automated test run'} ${executionDateTime}`;
       const description = 'For the Cypress run visit https://dashboard.cypress.io/#/projects/runs';
-      this.testRail.createRun(name, description);
+      if (options.usePlan === true) {
+        this.testRail.createPlan(name, description);
+      } else {
+        let suiteId: number = options.suiteId;
+        this.testRail.createRun(name, description, suiteId);
+      }
     });
 
     runner.on('pass', test => {

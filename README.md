@@ -16,6 +16,23 @@ $ npm install cypress-testrail-reporter --save-dev
 
 Add reporter to your `cypress.json`:
 
+Ex: using a TestRail Plan containing multiple Suites
+
+```json
+...
+"reporter": "cypress-testrail-reporter",
+"reporterOptions": {
+  "domain": "yourdomain.testrail.com",
+  "username": "username",
+  "password": "password",
+  "usePlan": true,
+  "projectId": 1,
+  "suiteIds": [1, 2, 3],
+}
+```
+
+Ex: using a TestRail Run containing only one Suite
+
 ```json
 ...
 "reporter": "cypress-testrail-reporter",
@@ -50,7 +67,11 @@ it("Can authenticate a valid userC123", ...
 
 **projectId**: _number_ project with which the tests are associated.
 
-**suiteId**: _number_ suite with which the tests are associated.
+**usePlan**: _boolean_ if true a TestRail Plan containing one or more runs will be created based on the values specified for **suiteIds**.
+
+**suiteIds**: _number[]_ (required only when **usePlan** is true) the suites with which the tests are associated.
+
+**suiteId**: _number_ (required when **usePlan** is false or not included) suite with which the tests are associated.
 
 **runName**: _string_ (optional) name of the Testrail run.
 
