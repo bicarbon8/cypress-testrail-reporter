@@ -54,54 +54,105 @@ var TestRail = /** @class */ (function () {
         return { 'Content-Type': 'application/json' };
     };
     TestRail.prototype.createPlan = function (name, description, milestoneId) {
-        var _this = this;
-        var suiteIds = this.options.suiteIds;
-        var entries = [];
-        for (var i = 0; i < suiteIds.length; i++) {
-            var entry = {
-                suite_id: suiteIds[i],
-                name: name + " - Suite " + suiteIds[i],
-                include_all: true
-            };
-            entries.push(entry);
-        }
-        var data = {
-            name: name,
-            description: description,
-            entries: entries
-        };
-        if (milestoneId) {
-            data['milestone_id'] = milestoneId;
-        }
-        this.post('add_plan', this.options.projectId.toString(), data)
-            .then(function (plan) {
-            _this.planId = plan.id;
-        }).catch(function (err) {
-            console.error(err);
+        return __awaiter(this, void 0, void 0, function () {
+            var suiteIds, entries, i, entry, data, plan, e_1;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        suiteIds = this.options.suiteIds;
+                        entries = [];
+                        for (i = 0; i < suiteIds.length; i++) {
+                            entry = {
+                                suite_id: suiteIds[i],
+                                name: name + " - Suite " + suiteIds[i],
+                                include_all: true
+                            };
+                            entries.push(entry);
+                        }
+                        data = {
+                            name: name,
+                            description: description,
+                            entries: entries
+                        };
+                        if (milestoneId) {
+                            data['milestone_id'] = milestoneId;
+                        }
+                        _a.label = 1;
+                    case 1:
+                        _a.trys.push([1, 3, , 4]);
+                        return [4 /*yield*/, this.post('add_plan', this.options.projectId.toString(), data)];
+                    case 2:
+                        plan = _a.sent();
+                        this.planId = plan.id;
+                        return [3 /*break*/, 4];
+                    case 3:
+                        e_1 = _a.sent();
+                        console.error(e_1);
+                        return [3 /*break*/, 4];
+                    case 4:
+                        ;
+                        return [2 /*return*/];
+                }
+            });
         });
     };
     TestRail.prototype.createRun = function (name, description, suiteId) {
-        var _this = this;
-        this.post('add_run', this.options.projectId.toString(), {
-            suite_id: suiteId,
-            name: name,
-            description: description,
-            include_all: true,
-        }).then(function (run) {
-            _this.runId = run.id;
-        }).catch(function (err) {
-            console.error(err);
+        return __awaiter(this, void 0, void 0, function () {
+            var run_1, e_2;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        _a.trys.push([0, 2, , 3]);
+                        return [4 /*yield*/, this.post('add_run', this.options.projectId.toString(), {
+                                suite_id: suiteId,
+                                name: name,
+                                description: description,
+                                include_all: true,
+                            })];
+                    case 1:
+                        run_1 = _a.sent();
+                        this.runId = run_1.id;
+                        return [3 /*break*/, 3];
+                    case 2:
+                        e_2 = _a.sent();
+                        console.error(e_2);
+                        return [3 /*break*/, 3];
+                    case 3: return [2 /*return*/];
+                }
+            });
         });
     };
-    TestRail.prototype.deleteRun = function () {
-        this.post('delete_run', this.runId.toString(), {})
-            .catch(function (err) {
-            console.error(err);
+    TestRail.prototype.deleteReport = function () {
+        return __awaiter(this, void 0, void 0, function () {
+            var e_3;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        _a.trys.push([0, 5, , 6]);
+                        if (!(this.options.usePlan === true)) return [3 /*break*/, 2];
+                        return [4 /*yield*/, this.post('delete_plan', this.planId.toString())];
+                    case 1:
+                        _a.sent();
+                        return [3 /*break*/, 4];
+                    case 2: return [4 /*yield*/, this.post('delete_run', this.runId.toString())];
+                    case 3:
+                        _a.sent();
+                        _a.label = 4;
+                    case 4: return [3 /*break*/, 6];
+                    case 5:
+                        e_3 = _a.sent();
+                        console.error(e_3);
+                        return [3 /*break*/, 6];
+                    case 6:
+                        ;
+                        return [2 /*return*/];
+                }
+            });
         });
     };
     TestRail.prototype.publishResults = function (results) {
         return __awaiter(this, void 0, void 0, function () {
-            var i, test_1, e_1, e_2;
+            var i, test_1, e_4, e_5, path;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
@@ -113,7 +164,7 @@ var TestRail = /** @class */ (function () {
                         _a.label = 2;
                     case 2:
                         _a.trys.push([2, 5, , 6]);
-                        return [4 /*yield*/, this.getTestByCaseId("C" + results[i].case_id)];
+                        return [4 /*yield*/, this.getTestByCaseId(results[i].case_id)];
                     case 3:
                         test_1 = _a.sent();
                         return [4 /*yield*/, this.post('add_result', test_1.id.toString(), results[i])];
@@ -121,8 +172,8 @@ var TestRail = /** @class */ (function () {
                         _a.sent();
                         return [3 /*break*/, 6];
                     case 5:
-                        e_1 = _a.sent();
-                        console.error(e_1);
+                        e_4 = _a.sent();
+                        console.error(e_4);
                         return [3 /*break*/, 6];
                     case 6:
                         i++;
@@ -137,15 +188,16 @@ var TestRail = /** @class */ (function () {
                         _a.sent();
                         return [3 /*break*/, 11];
                     case 10:
-                        e_2 = _a.sent();
-                        console.error(e_2);
+                        e_5 = _a.sent();
+                        console.error(e_5);
                         return [3 /*break*/, 11];
                     case 11:
                         ;
                         _a.label = 12;
                     case 12:
                         console.log('\n', chalk.magenta.underline.bold('(TestRail Reporter)'));
-                        console.log('\n', " - " + results.length + " Results are published to " + chalk.magenta("https://" + this.options.domain + "/index.php?/runs/view/" + this.planId), '\n');
+                        path = (this.options.usePlan === true) ? "plans/view/" + this.planId.toString() : "runs/view/" + this.runId.toString();
+                        console.log('\n', " - " + results.length + " Results are published to " + chalk.magenta("https://" + this.options.domain + "/index.php?/" + path), '\n');
                         return [2 /*return*/];
                 }
             });
@@ -167,7 +219,7 @@ var TestRail = /** @class */ (function () {
                     case 2:
                         tests = _a.sent();
                         for (i = 0; i < tests.length; i++) {
-                            if (caseId == "C" + tests[i].case_id) {
+                            if (caseId == tests[i].case_id) {
                                 return [2 /*return*/, tests[i]];
                             }
                         }
@@ -182,7 +234,7 @@ var TestRail = /** @class */ (function () {
             runIds[_i] = arguments[_i];
         }
         return __awaiter(this, void 0, void 0, function () {
-            var allTests, i, runId, runTests, i, e_3;
+            var allTests, i, runId, runTests, i, e_6;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
@@ -204,8 +256,8 @@ var TestRail = /** @class */ (function () {
                         }
                         return [3 /*break*/, 5];
                     case 4:
-                        e_3 = _a.sent();
-                        console.error(e_3);
+                        e_6 = _a.sent();
+                        console.error(e_6);
                         return [3 /*break*/, 5];
                     case 5:
                         i++;
@@ -220,7 +272,7 @@ var TestRail = /** @class */ (function () {
     };
     TestRail.prototype.getRunsInPlan = function (planId) {
         return __awaiter(this, void 0, void 0, function () {
-            var runs, plan, i, j, e_4;
+            var runs, plan, i, j, e_7;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
@@ -239,8 +291,8 @@ var TestRail = /** @class */ (function () {
                         }
                         return [3 /*break*/, 4];
                     case 3:
-                        e_4 = _a.sent();
-                        console.error(e_4);
+                        e_7 = _a.sent();
+                        console.error(e_7);
                         return [3 /*break*/, 4];
                     case 4:
                         ;
@@ -273,7 +325,7 @@ var TestRail = /** @class */ (function () {
     };
     TestRail.prototype.makeRequest = function (method, action, urlData, data) {
         return __awaiter(this, void 0, void 0, function () {
-            var config, responseObj, resp, e_5;
+            var config, responseObj, resp, e_8;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
@@ -295,11 +347,11 @@ var TestRail = /** @class */ (function () {
                         if (!(resp.data && resp.data.error)) return [3 /*break*/, 7];
                         if (!new String(resp.data.error).includes('API Rate Limit Exceeded')) return [3 /*break*/, 5];
                         // API RATE LIMIT REACHED: wait one minute and then retry request
+                        console.log('TestRail API Rate Limit reached: waiting one minute and then retrying request...');
                         return [4 /*yield*/, new Promise(function (resolve, reject) {
                                 setTimeout(resolve, 60000);
                             })];
                     case 3:
-                        // API RATE LIMIT REACHED: wait one minute and then retry request
                         _a.sent();
                         return [4 /*yield*/, this.makeRequest(method, action, urlData, data)];
                     case 4:
@@ -312,8 +364,8 @@ var TestRail = /** @class */ (function () {
                         _a.label = 8;
                     case 8: return [3 /*break*/, 10];
                     case 9:
-                        e_5 = _a.sent();
-                        console.error(e_5);
+                        e_8 = _a.sent();
+                        console.error(e_8);
                         return [3 /*break*/, 10];
                     case 10: return [2 /*return*/, responseObj];
                 }
