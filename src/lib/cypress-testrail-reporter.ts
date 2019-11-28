@@ -72,7 +72,7 @@ export class CypressTestRailReporter extends reporters.Spec {
           'No testcases were matched. Ensure that your tests are declared correctly and matches Cxxx',
           '\n'
         );
-        this.testRail.deleteRun();
+        this.testRail.deleteReport();
 
         return;
       }

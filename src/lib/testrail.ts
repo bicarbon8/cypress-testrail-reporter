@@ -24,7 +24,7 @@ export class TestRail {
     return { 'Content-Type': 'application/json' };
   }
 
-  public createPlan(name: string, description: string, milestoneId?: number) {
+  public async createPlan(name: string, description: string, milestoneId?: number): Promise<void> {
     let suiteIds: number[] = this.options.suiteIds;
     let entries: {}[] = [];
     for (var i=0; i<suiteIds.length; i++) {
@@ -44,39 +44,45 @@ export class TestRail {
       data['milestone_id'] = milestoneId;
     }
 
-    this.post<TestRailPlan>('add_plan', this.options.projectId.toString(), data)
-    .then((plan) => {
+    try {
+      let plan: TestRailPlan = await this.post<TestRailPlan>('add_plan', this.options.projectId.toString(), data);
       this.planId = plan.id;
-    }).catch((err) => {
-      console.error(err);
-    });
+    } catch(e) {
+      console.error(e);
+    };
   }
 
-  public createRun(name: string, description: string, suiteId: number) {
-    this.post<TestRailRun>('add_run', this.options.projectId.toString(), {
-      suite_id: suiteId,
-      name,
-      description,
-      include_all: true,
-    }).then((run) => {
+  public async createRun(name: string, description: string, suiteId: number): Promise<void> {
+    try {
+      let run: TestRailRun = await this.post<TestRailRun>('add_run', this.options.projectId.toString(), {
+        suite_id: suiteId,
+        name,
+        description,
+        include_all: true,
+      });
       this.runId = run.id;
-    }).catch((err) => {
-      console.error(err);
-    });
+    } catch(e) {
+      console.error(e);
+    }
   }
 
-  public deleteRun() {
-    this.post<any>('delete_run', this.runId.toString(), {})
-    .catch((err) => {
-      console.error(err);
-    });
+  public async deleteReport(): Promise<void> {
+    try {
+      if (this.options.usePlan === true) {
+        await this.post<any>('delete_plan', this.planId.toString());
+      } else {
+        await this.post<any>('delete_run', this.runId.toString());
+      }
+    } catch(e) {
+      console.error(e);
+    };
   }
 
   public async publishResults(results: TestRailResult[]): Promise<void> {
     if (this.options.usePlan === true) {
       for(var i=0; i<results.length; i++) {
         try {
-          let test: TestRailTest = await this.getTestByCaseId(`C${results[i].case_id}`);
+          let test: TestRailTest = await this.getTestByCaseId(results[i].case_id);
           await this.post<TestRailResult>('add_result', test.id.toString(), results[i]);
         } catch (e) {
           console.error(e);
@@ -93,16 +99,17 @@ export class TestRail {
     }
 
     console.log('\n', chalk.magenta.underline.bold('(TestRail Reporter)'));
+    let path: string = (this.options.usePlan === true) ? `plans/view/${this.planId.toString()}` : `runs/view/${this.runId.toString()}`;
     console.log(
       '\n',
       ` - ${results.length} Results are published to ${chalk.magenta(
-        `https://${this.options.domain}/index.php?/runs/view/${this.planId}`
+        `https://${this.options.domain}/index.php?/${path}`
       )}`,
       '\n'
     );
   }
 
-  public async getTestByCaseId(caseId: string): Promise<TestRailTest> {
+  public async getTestByCaseId(caseId: number): Promise<TestRailTest> {
     let runs: TestRailRun[] = await this.getRunsInPlan(this.planId);
     let runIds: number[] = [];
     for(var i=0; i<runs.length; i++) {
@@ -110,7 +117,7 @@ export class TestRail {
     }
     let tests: TestRailTest[] = await this.getTestsInRuns(...runIds);
     for(var i=0; i<tests.length; i++) {
-      if (caseId == `C${tests[i].case_id}`) {
+      if (caseId == tests[i].case_id) {
         return tests[i];
       }
     }
@@ -158,7 +165,7 @@ export class TestRail {
     return await this.makeRequest<T>('GET', action, urlData);
   }
 
-  private async post<T>(action: string, urlData: string, data: {}): Promise<T> {
+  private async post<T>(action: string, urlData: string, data?: {}): Promise<T> {
     return await this.makeRequest<T>('POST', action, urlData, data);
   }
 
@@ -178,6 +185,7 @@ export class TestRail {
       if (resp.data && resp.data.error) {
         if (new String(resp.data.error).includes('API Rate Limit Exceeded')) {
           // API RATE LIMIT REACHED: wait one minute and then retry request
+          console.log('TestRail API Rate Limit reached: waiting one minute and then retrying request...')
           await new Promise((resolve, reject) => {
             setTimeout(resolve, 60000);
           });
