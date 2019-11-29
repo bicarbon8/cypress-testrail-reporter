@@ -7,6 +7,7 @@ export interface TestRailOptions {
   suiteIds?: number[];
   assignedToId?: number;
   usePlan?: boolean;
+  runName?: string;
 }
 
 export enum Status {
