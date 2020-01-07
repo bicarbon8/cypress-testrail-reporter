@@ -9,17 +9,6 @@ function TestRail(options) {
   var runs = [];
   var tests = [];
 
-  this.getAuth = function() {
-    return {
-      username: options.username,
-      password: options.password,
-    };
-  }
-
-  this.getHeaders = function() {
-    return { 'Content-Type': 'application/json' };
-  }
-
   this.createPlan = async function(name, description, milestoneId) {
     var suiteIds = options.suiteIds;
     var entries = [];
@@ -46,7 +35,7 @@ function TestRail(options) {
     } catch(e) {
       console.error(e);
     };
-  }
+  };
 
   this.createRun = async function(name, description, suiteId) {
     try {
@@ -60,7 +49,7 @@ function TestRail(options) {
     } catch(e) {
       console.error(e);
     }
-  }
+  };
 
   this.deleteReport = async function() {
     try {
@@ -72,7 +61,7 @@ function TestRail(options) {
     } catch(e) {
       console.error(e);
     };
-  }
+  };
 
   this.publishResults = async function(results) {
     if (options.usePlan === true) {
@@ -103,7 +92,7 @@ function TestRail(options) {
       )}`,
       '\n'
     );
-  }
+  };
 
   this.getTestByCaseId = async function(caseId) {
     var runs = await this.getRunsInPlan(this.planId);
@@ -118,7 +107,7 @@ function TestRail(options) {
       }
     }
     return null;
-  }
+  };
 
   this.getTestsInRuns = async function(...runIds) {
     // lookup and cache tests
@@ -139,7 +128,7 @@ function TestRail(options) {
     }
     // return cached tests array
     return tests;
-  }
+  };
 
   this.getRunsInPlan = async function(planId) {
     // lookup and cache the runs
@@ -159,7 +148,7 @@ function TestRail(options) {
     }
     // return cached array of runs
     return runs;
-  }
+  };
 
   /**
    * sends a GET request to TestRail's API with the passed in action and urlData
@@ -168,7 +157,7 @@ function TestRail(options) {
    */
   var get = async function(action, urlData) {
     return await makeRequest('GET', action, urlData);
-  }
+  };
 
   /**
    * sends a POST request to TestRail's API with the passed in action and urlData and a request
@@ -179,14 +168,25 @@ function TestRail(options) {
    */
   var post = async function(action, urlData, data) {
     return await makeRequest('POST', action, urlData, data);
-  }
+  };
+
+  var getAuth = function() {
+    return {
+      username: options.username,
+      password: options.password,
+    };
+  };
+
+  var getHeaders = function() {
+    return { 'Content-Type': 'application/json' };
+  };
 
   var makeRequest = async function(method, action, urlData, data) {
     var config = { // AxiosRequestConfig
       method: method,
       url: `${this.base}/${action}/${urlData}`,
-      headers: this.getHeaders(),
-      auth: this.getAuth()
+      headers: getHeaders(),
+      auth: getAuth()
     };
     if (data) {
       config['data'] = JSON.stringify(data);
@@ -212,7 +212,7 @@ function TestRail(options) {
       console.error(e);
     }
     return responseObj;
-  }
+  };
 }
 
 module.exports = TestRail;
