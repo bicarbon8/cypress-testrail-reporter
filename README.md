@@ -85,9 +85,10 @@ For TestRail hosted accounts maintained by [Gurock](http://www.gurock.com/), all
 
 You can read the whole TestRail documentation [here](http://docs.gurock.com/).
 
-## Author
+## Authors
 
-Milutin Savovic - [github](https://github.com/mickosav)
+* Jason Holt Smith - [github](https://github.com/bicarbon8)
+* Milutin Savovic - [github](https://github.com/mickosav)
 
 ## License
 

@@ -1,1 +1,3 @@
-module.exports = require('./dist/cypress-testrail-reporter').CypressTestRailReporter;
+const CypressTestRailReporter = require('./src/cypress-testrail-reporter');
+
+module.exports = CypressTestRailReporter;
