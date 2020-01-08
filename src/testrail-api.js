@@ -1,14 +1,12 @@
 const axios = require('axios');
-const chalk = require('chalk');
+const TestRailCache = require('./testrail-cache');
 
-class TestRail {
+class TestRailApi {
   constructor(options) {
     this.options = options;
     this.base = `https://${this.options.domain}/index.php?/api/v2`;
     this.runId;
     this.planId;
-    this.runs = [];
-    this.tests = [];
   }
 
   async createPlan(name, description, milestoneId) {
@@ -84,16 +82,6 @@ class TestRail {
         console.error(e);
       };
     }
-
-    console.log('\n', chalk.magenta.underline.bold('(TestRail Reporter)'));
-    var path = (this.options.usePlan === true) ? `plans/view/${this.planId.toString()}` : `runs/view/${this.runId.toString()}`;
-    console.log(
-      '\n',
-      ` - ${results.length} Results are published to ${chalk.magenta(
-        `https://${this.options.domain}/index.php?/${path}`
-      )}`,
-      '\n'
-    );
   };
 
   async getTestByCaseId(caseId) {
@@ -113,7 +101,8 @@ class TestRail {
 
   async getTestsInRuns(...runIds) {
     // lookup and cache tests
-    if (!this.tests || this.tests.length == 0) {
+    var cachedTests = TestRailCache.retrieve('tests');
+    if (!cachedTests || cachedTests.length == 0) {
       var allTests = [];
       for (var i=0; i<runIds.length; i++) {
         var rId = runIds[i];
@@ -126,15 +115,17 @@ class TestRail {
           console.error(e);
         }
       }
-      this.tests = allTests;
+      cachedTests = allTests;
+      TestRailCache.store('tests', cachedTests);
     }
     // return cached tests array
-    return this.tests;
+    return cachedTests;
   };
 
   async getRunsInPlan(pId) {
     // lookup and cache the runs
-    if (!this.runs || this.runs.length == 0) {
+    var cachedRuns = TestRailCache.retrieve('runs');
+    if (!cachedRuns || cachedRuns.length == 0) {
       var r = [];
       try {
         var plan = await this._get('get_plan', pId.toString());
@@ -146,10 +137,11 @@ class TestRail {
       } catch(e) {
         console.error(e);
       };
-      this.runs = r;
+      cachedRuns = r;
+      TestRailCache.store('runs', cachedRuns);
     }
     // return cached array of runs
-    return this.runs;
+    return cachedRuns;
   };
 
   /**
@@ -217,4 +209,4 @@ class TestRail {
   };
 }
 
-module.exports = TestRail;
+module.exports = TestRailApi;

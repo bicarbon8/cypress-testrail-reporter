@@ -46,7 +46,7 @@ describe('CypressTestRailReporter', () => {
         };
         var reporter = new CypressTestRailReporter(runner, options);
         expect(reporter).not.to.be.null;
-        expect(reporter.testRail).not.to.be.null;
+        expect(reporter.api).not.to.be.null;
     });
 });
 
