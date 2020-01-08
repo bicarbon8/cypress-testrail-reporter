@@ -29,6 +29,25 @@ describe('CypressTestRailReporter', () => {
         var events = TestStore.getEvents();
         expect(events.length).to.be.equal(4);
     });
+
+    it('instantiates the testRail property', async () => {
+        var runner = new FakeRunner();
+        var repOpts = { // TestRailOptions
+            username: "foo@bar.baz",
+            password: "fake1234",
+            domain: "fake.fake.fk",
+            projectId: 3,
+            usePlan: true,
+            suiteIds: [1, 2],
+            runName: "fake run name"
+        };
+        var options = {
+            reporterOptions: repOpts
+        };
+        var reporter = new CypressTestRailReporter(runner, options);
+        expect(reporter).not.to.be.null;
+        expect(reporter.testRail).not.to.be.null;
+    });
 });
 
 function FakeRunner() {
@@ -37,24 +56,21 @@ function FakeRunner() {
     this.suite;
     this.total;
     this.failures;
-    this.grep = function(re, invert) {
-        
-    }
-    this.grepTotal = function(suite) {
 
-    };
-    this.globals = function(arr) {
+    this.grep = (re, invert) => {}
+    this.grepTotal = (suite) => {};
+    this.globals = (arr) => {};
+    this.abort = () => {};
+    this.run = (fn) => {};
 
-    };
-    this.abort = function() {
-
-    };
-    this.run = function(fn) {
-
-    };
-
-    this.on = function(event, action) {
+    this.on = (event, action) => {
         TestStore.store(event, action);
+        return this;
+    }
+
+    this.once = (event, action) => {
+        TestStore.store(event, action);
+        return this;
     }
 }
 
