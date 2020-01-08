@@ -1,11 +1,10 @@
-const Axios = require('axios');
+const axios = require('axios');
 const chalk = require('chalk');
 
 function TestRail(options) {
-  this.base = `https://${options.domain}/index.php?/api/v2`;
-  this.runId;
-  this.planId;
-  
+  var base = `https://${options.domain}/index.php?/api/v2`;
+  var runId;
+  var planId;
   var runs = [];
   var tests = [];
 
@@ -31,7 +30,7 @@ function TestRail(options) {
 
     try {
       var plan = await post('add_plan', options.projectId.toString(), data);
-      this.planId = plan.id;
+      planId = plan.id;
     } catch(e) {
       console.error(e);
     };
@@ -45,7 +44,7 @@ function TestRail(options) {
         description,
         include_all: true,
       });
-      this.runId = run.id;
+      runId = run.id;
     } catch(e) {
       console.error(e);
     }
@@ -54,9 +53,9 @@ function TestRail(options) {
   this.deleteReport = async function() {
     try {
       if (options.usePlan === true) {
-        await post('delete_plan', this.planId.toString());
+        await post('delete_plan', planId.toString());
       } else {
-        await post('delete_run', this.runId.toString());
+        await post('delete_run', runId.toString());
       }
     } catch(e) {
       console.error(e);
@@ -75,7 +74,7 @@ function TestRail(options) {
       }
     } else {
       try {
-        await post('add_results_for_cases', this.runId.toString(), { 
+        await post('add_results_for_cases', runId.toString(), { 
           results: results
         });
       } catch(e) {
@@ -84,7 +83,7 @@ function TestRail(options) {
     }
 
     console.log('\n', chalk.magenta.underline.bold('(TestRail Reporter)'));
-    var path = (options.usePlan === true) ? `plans/view/${this.planId.toString()}` : `runs/view/${this.runId.toString()}`;
+    var path = (options.usePlan === true) ? `plans/view/${planId.toString()}` : `runs/view/${runId.toString()}`;
     console.log(
       '\n',
       ` - ${results.length} Results are published to ${chalk.magenta(
@@ -95,7 +94,7 @@ function TestRail(options) {
   };
 
   this.getTestByCaseId = async function(caseId) {
-    var runs = await this.getRunsInPlan(this.planId);
+    var runs = await this.getRunsInPlan(planId);
     var runIds = [];
     for(var i=0; i<runs.length; i++) {
       runIds.push(runs[i].id);
@@ -184,7 +183,7 @@ function TestRail(options) {
   var makeRequest = async function(method, action, urlData, data) {
     var config = { // AxiosRequestConfig
       method: method,
-      url: `${this.base}/${action}/${urlData}`,
+      url: `${base}/${action}/${urlData}`,
       headers: getHeaders(),
       auth: getAuth()
     };
@@ -193,7 +192,7 @@ function TestRail(options) {
     }
     var responseObj;
     try{
-      var resp = await Axios.request(config);
+      var resp = await axios(config);
       if (resp.data && resp.data.error) {
         if (new String(resp.data.error).includes('API Rate Limit Exceeded')) {
           // API RATE LIMIT REACHED: wait one minute and then retry request

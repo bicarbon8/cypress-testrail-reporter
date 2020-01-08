@@ -1,4 +1,5 @@
 const TestRail = require('./testrail');
+const TestStatus = require('./test-status');
 const titleToCaseIds = require('./shared');
 const chalk = require('chalk');
 const moment = require('moment');
@@ -29,11 +30,11 @@ function CypressTestRailReporter(runner, options) {
     });
 
     runner.on('pass', (test) => {
-      collectResults(Status.Passed, test, `Execution time: ${test.duration}ms`);
+      collectResults(TestStatus.passed, test, `Execution time: ${test.duration}ms`);
     });
 
     runner.on('fail', (test, err) => {
-      collectResults(Status.Failed, test, `${err.message}`);
+      collectResults(TestStatus.retest, test, `${err.message}`);
     });
 
     runner.on('end', async () => {
