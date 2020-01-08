@@ -4,11 +4,11 @@ const expect = chai.expect;
 
 describe('TestRailCache', () => {
     beforeEach(() => {
-        TestRailCache._purge();
+        TestRailCache.purge();
     });
 
     afterEach(() => {
-        TestRailCache._purge();
+        TestRailCache.purge();
     });
 
     it('can store and retrieve values', () => {
@@ -23,6 +23,6 @@ describe('TestRailCache', () => {
     });
 
     it('can load empty cache', () => {
-        expect(() => { TestRailCache._load(); }).not.to.throw();
+        expect(() => { TestRailCache.retrieve('doesNotExist'); }).not.to.throw();
     });
 });

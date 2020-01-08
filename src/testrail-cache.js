@@ -1,43 +1,44 @@
 const fs = require('fs');
 
+var cacheFileName = 'testrail-cache.txt';
+var cacheData = {};
+var fileExists = () => {
+    return fs.existsSync(cacheFileName);
+};
+var createFile = () => {
+    fs.writeFileSync(cacheFileName, '');
+};
+var persist = () => {
+    fs.writeFileSync(cacheFileName, JSON.stringify(cacheData), {
+        flag: 'w'
+    });
+};
+var load = () => {
+    if (!fileExists()) {
+        createFile();
+    }
+    var dataStr = fs.readFileSync(cacheFileName);
+    if (dataStr && dataStr != '') {
+        cacheData = JSON.parse(dataStr);
+    } else {
+        cacheData = {};
+    }
+};
+
 const TestRailCache = {
-    _cacheFileName: 'testrail-cache.txt',
-    _cacheFile: null,
-    _cacheData: {},
     store: (key, val) => {
-        TestRailCache._cacheData[key] = val;
-        TestRailCache._persist();
+        cacheData[key] = val;
+        persist();
     },
     retrieve: (key) => {
-        TestRailCache._load();
-        return TestRailCache._cacheData[key];
+        load();
+        return cacheData[key];
     },
-    _fileExists: () => {
-        return fs.existsSync(TestRailCache._cacheFileName);
-    },
-    _createFile: () => {
-        fs.writeFileSync(TestRailCache._cacheFileName, '');
-    },
-    _persist: () => {
-        fs.writeFileSync(TestRailCache._cacheFileName, JSON.stringify(TestRailCache._cacheData), {
-            flag: 'w'
-        });
-    },
-    _load: () => {
-        if (!TestRailCache._fileExists()) {
-            TestRailCache._createFile();
+    purge: () => {
+        if (fileExists()) {
+            fs.unlinkSync(cacheFileName);
         }
-        var dataStr = fs.readFileSync(TestRailCache._cacheFileName);
-        if (dataStr && dataStr != '') {
-            TestRailCache._cacheData = JSON.parse(dataStr);
-        } else {
-            TestRailCache._cacheData = {};
-        }
-    },
-    _purge: () => {
-        if (TestRailCache._fileExists()) {
-            fs.unlinkSync(TestRailCache._cacheFileName);
-        }
+        cacheData = {};
     }
 };
 

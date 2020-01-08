@@ -1,8 +1,8 @@
-module.export = {
+module.exports = {
     passed: 1,
-    failed: 5,
-    retest: 4,
     blocked: 2,
-    skipped: 9,
-    untested: 3
+    untested: 3,
+    retest: 4,
+    failed: 5,
+    skipped: 9
 };

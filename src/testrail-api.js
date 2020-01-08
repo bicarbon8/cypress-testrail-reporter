@@ -64,20 +64,31 @@ class TestRailApi {
   };
 
   async publishResults(results) {
+    var addedResults = [];
     if (this.options.usePlan === true) {
       for(var i=0; i<results.length; i++) {
         try {
           var test = await this.getTestByCaseId(results[i].case_id);
-          await this._post('add_result', test.id.toString(), results[i]);
+          let trs = await this._post('add_result', test.id.toString(), results[i]);
+          if (trs && trs.length > 0) {
+            addedResults.push(...trs);
+          } else {
+            throw new Error(`unable to add result of '${JSON.stringify(results[i])}' for test '${JSON.stringify(test.id)}'`);
+          }
         } catch (e) {
           console.error(e);
         }
       }
     } else {
       try {
-        await this._post('add_results_for_cases', this.runId.toString(), { 
+        let trs = await this._post('add_results_for_cases', this.runId.toString(), { 
           results: results
         });
+        if (trs && trs.length > 0) {
+          addedResults.push(...trs);
+        } else {
+          throw new Error(`unable to add result of '${JSON.stringify(results[i])}' for test '${JSON.stringify(test.id)}'`);
+        }
       } catch(e) {
         console.error(e);
       };
