@@ -10,7 +10,7 @@
         "--timeout",
         "999999",
         "--colors",
-        "${workspaceFolder}/dist/test/**/*-spec.js",
+        "${workspaceFolder}/**/*-spec.js",
        ],
        "console": "integratedTerminal",
        "internalConsoleOptions": "neverOpen"

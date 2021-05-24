@@ -1,12 +1,28 @@
 const chalk = require('chalk');
 
-module.exports = {
+const TestRailLogger = {
     log: (text) => {
-        console.log('\n', chalk.default.magenta.underline.bold('(TestRail Reporter)'));
-        console.log('\n', ' - ' + text, '\n');
+        TestRailLogger.out('info', text);
     },
     warn: (text) => {
+        TestRailLogger.out('warn', text);
+    },
+    error: (text) => {
+        TestRailLogger.out('error', text);
+    },
+    out: (level, text) => {
         console.log('\n', chalk.default.magenta.underline.bold('(TestRail Reporter)'));
-        console.warn('\n', ' - ' + text, '\n');
+        switch (level) {
+            case 'error':
+                console.error(`\n${text}\n`);
+                break;
+            case 'warn':
+                console.warn(`\n${text}\n`);
+                break;
+            default:
+                console.log(`\n${text}\n`);
+        }
     }
 }
+
+module.exports = TestRailLogger;

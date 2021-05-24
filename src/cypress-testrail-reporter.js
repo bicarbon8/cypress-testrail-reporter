@@ -1,8 +1,7 @@
 const Mocha = require('mocha');
 const TestRailApi = require('./testrail-api');
-const TestRailStatus = require('./testrail-status');
-const TestRailCache = require('./testrail-cache');
-const TestRailHelpers = require('./testrail-helpers');
+const TestRailApiObjects = require('./testrail-api-objects');
+const TestRailHelper = require('./testrail-helper');
 const TestRailLogger = require('./testrail-logger');
 const chalk = require('chalk');
 const moment = require('moment');
@@ -16,8 +15,9 @@ const {
 } = Mocha.Runner.constants;
 
 // this reporter outputs test results, indenting two spaces per suite
-class CypressTestRailReporter {
+class CypressTestRailReporter extends Mocha.reporters.Base {
   constructor(runner, options) {
+    super(runner, options);
     this.repOpts = this.validateOptions(options);
     this.api = new TestRailApi(this.repOpts);
     this.results = [];
@@ -30,10 +30,10 @@ class CypressTestRailReporter {
         await this.createTestPlanOrRun();
       })
       .on(EVENT_TEST_PASS, async (test) => {
-        await this.submitResults(TestRailStatus.passed, test, `Execution time: ${test.duration}ms`);
+        await this.submitResults(TestRailApiObjects.Status.passed, test, `Execution time: ${test.duration}ms`);
       })
       .on(EVENT_TEST_FAIL, async (test, err) => {
-        await this.submitResults(TestRailStatus.retest, test, `${err.message}`);
+        await this.submitResults(TestRailApiObjects.Status.retest, test, `${err.message}`);
       })
       .once(EVENT_RUN_END, async () => {
         await this.notifyAtEnd();
@@ -48,46 +48,38 @@ class CypressTestRailReporter {
   async createTestPlanOrRun() {
     // check if we have already created and cached the ID
     // only create new if nothing already cached
-    if (!TestRailCache.retrieve('planId') && !TestRailCache.retrieve('runId')) {
+    var obj = (this.repOpts.usePlan) ? await this.api.getPlan() : await this.api.getRun();
+    if (!obj) {
       var executionDateTime = moment().format('MMM Do YYYY, HH:mm (Z)');
-      var name = '';
-      if (this.repOpts.runName) {
-        name = this.repOpts.runName;
-      } else {
-        name = `Automated test run ${executionDateTime}`;
-      }
-      var description = 'For the Cypress run visit https://dashboard.cypress.io/#/projects/runs';
-      if (this.repOpts.usePlan === true) {
+      var name = `Automated test run ${executionDateTime}`;
+      var description = name;
+      if (this.repOpts.usePlan) {
         TestRailLogger.log(`creating TestRail Plan with name: '${name}'`);
         await this.api.createPlan(name, description);
-        // cache the TestRail Plan ID
-        TestRailCache.store('planId', this.api.planId);
       } else {
         var suiteId = this.repOpts.suiteId;
         TestRailLogger.log(`creating TestRail Run with name: ${name} from suite ${suiteId}`);
         await this.api.createRun(name, description, suiteId);
-        // cache the TestRail Run ID
-        TestRailCache.store('runId', this.api.runId);
       }
     } else {
-      if (this.repOpts.usePlan === true) {
+      if (this.repOpts.usePlan) {
         // use the cached TestRail Plan ID
-        this.api.planId = TestRailCache.retrieve('planId');
+        this.api.planId = obj.id;
         TestRailLogger.log(`using existing TestRail Plan with ID: '${this.api.planId}'`);
       } else {
         // use the cached TestRail Run ID
-        this.api.runId = TestRailCache.retrieve('runId');
+        this.api.runId = obj.id;
         TestRailLogger.log(`using existing TestRail Run with ID: '${this.api.runId}'`);
       }
     }
   }
 
   async notifyAtEnd() {
-    if (this.results.length == 0) {
-      TestRailLogger.warn('No testcases were matched with TestRail. Ensure that your tests are declared correctly and titles contain matches to format of Cxxxx');
+    if (this.results?.length) {
+      var id = (this.repOpts.usePlan) ? `plan: ${this.api.planId}` : `run: ${this.api.runId}`;
+      TestRailLogger.log(`${this.results.length} results are published to ${id} using ${chalk.magenta(this.repOpts.url)}`);
     } else {
-      var path = (this.repOpts.usePlan === true) ? `plans/view/${this.api.planId.toString()}` : `runs/view/${this.api.runId.toString()}`;
-      TestRailLogger.log(`${this.results.length} Results are published to ${chalk.magenta(`https://${this.repOpts.domain}/index.php?/${path}`)}`);
+      TestRailLogger.warn('No testcases were matched with TestRail. Ensure that your tests are declared correctly and titles contain matches to format of Cxxxx');
     }
   }
 
@@ -99,11 +91,11 @@ class CypressTestRailReporter {
     if (!reporterOptions) {
       throw new Error('Missing reporterOptions in cypress.json');
     }
-    this.validate(reporterOptions, 'domain');
+    this.validate(reporterOptions, 'url');
     this.validate(reporterOptions, 'username');
     this.validate(reporterOptions, 'password');
     this.validate(reporterOptions, 'projectId');
-    if (reporterOptions.usePlan === true) {
+    if (reporterOptions.usePlan) {
       this.validate(reporterOptions, 'suiteIds');
     } else {
       this.validate(reporterOptions, 'suiteId');
@@ -113,12 +105,12 @@ class CypressTestRailReporter {
 
   validate(options, name) {
     if (options[name] == null) {
-      throw new Error(`Missing ${name} value. Please update reporterOptions in cypress.json`);
+      throw new Error(`Missing ${name} value for 'cypress-testrail-reporter'. Please update reporterOptions in cypress.json`);
     }
   }
 
   async submitResults(status, test, comment) {
-    var caseIds = TestRailHelpers.titleToCaseIds(test.title);
+    var caseIds = TestRailHelper.titleToCaseIds(test.title);
     if (caseIds.length > 0) {
       var caseResults = caseIds.map(caseId => {
         return {
