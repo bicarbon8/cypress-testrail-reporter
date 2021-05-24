@@ -1,13 +1,13 @@
-const TestRailStatus = require('../src/testrail-status');
+const TestRailApiObjects = require("../src/testrail-api-objects");
 const chai = require("chai");
 const expect = chai.expect;
 
 describe('TestRailStatus', () => {
     it('can get expected passing status', () => {
-        expect(TestRailStatus.passed).to.be.equal(1);
+        expect(TestRailApiObjects.Status.passed).to.be.equal(1);
     });
 
     it('can get expected retest status', () => {
-        expect(TestRailStatus.retest).to.be.equal(4);
+        expect(TestRailApiObjects.Status.retest).to.be.equal(4);
     });
 });

@@ -19,7 +19,7 @@ describe('TestRailCache', () => {
 
         let actual = TestRailCache.retrieve(key);
 
-        expect(actual).to.be.equal(val);
+        expect(actual).to.equal(val);
     });
 
     it('can load empty cache', () => {

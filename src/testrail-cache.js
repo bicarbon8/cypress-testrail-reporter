@@ -1,19 +1,19 @@
 const fs = require('fs');
 
-var cacheFileName = 'testrail-cache.txt';
+const cacheFileName = 'testrail-cache.txt';
 var cacheData = {};
-var fileExists = () => {
+const fileExists = () => {
     return fs.existsSync(cacheFileName);
 };
-var createFile = () => {
-    fs.writeFileSync(cacheFileName, '');
+const createFile = () => {
+    fs.writeFileSync(cacheFileName, '{}');
 };
-var persist = () => {
+const persist = () => {
     fs.writeFileSync(cacheFileName, JSON.stringify(cacheData), {
         flag: 'w'
     });
 };
-var load = () => {
+const load = () => {
     if (!fileExists()) {
         createFile();
     }

@@ -18,7 +18,7 @@ Ex: using a TestRail Plan containing multiple Suites
 ...
 "reporter": "cypress-testrail-reporter",
 "reporterOptions": {
-  "domain": "yourdomain.testrail.com",
+  "url": "https://yourdomain.testrail.io",
   "username": "username",
   "password": "password",
   "usePlan": true,
@@ -33,7 +33,7 @@ Ex: using a TestRail Run containing only one Suite
 ...
 "reporter": "cypress-testrail-reporter",
 "reporterOptions": {
-  "domain": "yourdomain.testrail.com",
+  "url": "https://yourdomain.testrail.io",
   "username": "username",
   "password": "password",
   "projectId": 1,
@@ -54,22 +54,13 @@ it("Can authenticate a valid userC123", ...
 ```
 
 ## Reporter Options
-
-**domain**: _string_ domain name of your TestRail instance (e.g. for a hosted instance _instance.testrail.com_).
-
-**username**: _string_ email of the user under which the test run will be created.
-
-**password**: _string_ password or the API key for the aforementioned user.
-
-**projectId**: _number_ project with which the tests are associated.
-
-**usePlan**: _boolean_ if true a TestRail Plan containing one or more runs will be created based on the values specified for **suiteIds**.
-
-**suiteIds**: _number[]_ (required only when **usePlan** is true) the suites with which the tests are associated.
-
-**suiteId**: _number_ (required when **usePlan** is false or not included) suite with which the tests are associated.
-
-**runName**: _string_ (optional) name of the Testrail run.
+- `url`: _string_ full URL to your TestRail instance (e.g. for a hosted instance _https://instance.testrail.io_).
+- `username`: _string_ containing the email of the user under which the test run will be created.
+- `password`: _string_ containing the password or API key for the aforementioned user.
+- `projectId`: _number_ representing a project with which the tests are associated.
+- `usePlan`: _boolean_ representing if a TestRail Plan containing one or more runs should be created based on the values specified for **suiteIds** or if only a TestRail Run should be used _(defaults to `false`)_.
+- `suiteIds`: _number[]_ containing the suites with which the tests are associated _(required only when **usePlan** is `true`)_.
+- `suiteId`: _number_ containing the suite with which the tests are associated _(required when **usePlan** is `false` or not included)_.
 
 ## TestRail Settings
 
@@ -91,4 +82,4 @@ This project is licensed under the [MIT license](/LICENSE.md).
 
 ## Acknowledgments
 
-* [Milutin Savovic](https://github.com/mickosav), owner of the [cypress-testrail-reporter](https://github.com/mickosav/cypress-testrail-reporter) repository that was forked.
+* [Milutin Savovic](https://github.com/mickosav), owner of the [cypress-testrail-reporter](https://github.com/mickosav/cypress-testrail-reporter) repository from which this project was forked.
